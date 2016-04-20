@@ -1,13 +1,9 @@
-//
-// # SimpleServer
-//
-// A simple chat server using Socket.IO, Express, and Async.
-//
+'use strict';
 var http = require('http');
 var path = require('path');
 var express = require('express');
-var favicon = require('serve-favicon');
 var morgan = require('morgan')
+var favicon = require('serve-favicon');
 var session = require('express-session');
 var mongoStore = require('connect-mongo')(session);
 var passport = require('passport');
@@ -15,24 +11,26 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 
-var webpackMiddleware =require('webpack-dev-middleware');
-var webpackConfig =require('../webpack.config.js');
-//import webpack from 'webpack';  
-var webpack = require('webpack');
-var webpackHotMiddleware = require('webpack-hot-middleware');
-
 var app = express();
 
 
-console.log("env",process.env);
-var isDeveloping = process.env.NODE_ENV !== 'production';
+  require('dotenv').config();
 
+var isDeveloping = process.env.NODE_ENV !== 'production';
+//console.log("env",process.env.NODE_ENV, isDeveloping);
 
 if(isDeveloping){
   require('dotenv').config();
-  
-  
+
+  var webpack = require('webpack');
+  var webpackConfig =require('../webpack.config.js');
+  //import webpack from 'webpack';  
+  var webpackMiddleware =require('webpack-dev-middleware');
+  var webpackHotMiddleware = require('webpack-hot-middleware');
   var compiler = webpack(webpackConfig);
+  
+  
+  
   app.use(webpackMiddleware(compiler, {
       noInfo: true, 
       publicPath: webpackConfig.output.publicPath,
@@ -43,7 +41,7 @@ if(isDeveloping){
   app.use(webpackHotMiddleware(compiler));
 }
 
-var yelp =require('./api/yelp');
+
 
 
 var config={
@@ -64,12 +62,11 @@ mongoose.connection.on('error', function(err){
 });
 
 
-var server = http.createServer(app);
 
 
 
 app.use(express.static(path.resolve(path.join(__dirname,".."), 'public'))); // this above session/cookie middlewares prevent create for static files
-app.use(favicon(__dirname+'../public/favicon.ico'));
+app.use(favicon(__dirname+'/../public/favicon.ico'));
 
 
 // middlewares
@@ -77,7 +74,7 @@ app.use(favicon(__dirname+'../public/favicon.ico'));
 app.use(session({
   secret: config.secret,
   resave: true,
-  saveUninitialize:true,
+  saveUninitialized: true,
   store: new mongoStore({mongooseConnection: mongoose.connection, db: 'nightreact'})
 }));
 
@@ -95,7 +92,11 @@ app.use(morgan('dev'));
 
 
 ///////////// routes
+
 app.use('/api/bars', require('./api/yelp'));
+
+
+var server = http.createServer(app);
 
 server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
   var addr = server.address();
