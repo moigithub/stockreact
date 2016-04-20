@@ -16,7 +16,16 @@ function getBars(req,res){
    
   // See http://www.yelp.com/developers/documentation/v2/search_api 
 //  console.log("yelp api location:(NO debe estar urlencoded) ",req.params.location);
-  yelp.search({ category_filter: "bars", location: req.params.location })
+
+//https://www.yelp.com/developers/documentation/v2/search_api
+//location	string	required
+  var search={ category_filter: "bars"};
+  console.log("loca",req.params.location);
+
+  if( req.params.location ){ search.location=req.params.location};
+  console.log("serach: ",search);
+  
+  yelp.search(search)
   .then(function (data) {
     if(!data) { return res.status(404).send('Not Found'); }
     return res.json(data);
@@ -39,6 +48,6 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/:location', getBars);
-
+router.get('/', getBars);
 
 module.exports = router;
