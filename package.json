@@ -6,7 +6,9 @@
   "repository": "",
   "author": "Mostafa Eweda <mo.eweda@gmail.com>",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "dev":"NODE_ENV=development node server/server.js",
+    "prod":"NODE_ENV=production webpack -p node server/server.js"
   },
   "dependencies": {
     "body-parser": "^1.15.0",

@@ -38,9 +38,10 @@ if(isDeveloping){
         colors: true,
       }
   }));
-  app.use(webpackHotMiddleware(compiler));
+  app.use(webpackHotMiddleware(compiler, {
+    log: console.log
+  }));
 }
-
 
 
 
