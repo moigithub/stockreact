@@ -48,6 +48,6 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/:location', getBars);
-router.get('/', getBars);
+
 
 module.exports = router;

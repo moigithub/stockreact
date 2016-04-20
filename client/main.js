@@ -8,35 +8,88 @@ import ReactDOM from 'react-dom';
 
 require("./styles.css");
 
+class Place extends React.Component {
+    constructor(props){
+        super(props);
+    }
+    
+    render(){
+        return (
+            <li className="list-group-item list-group-item-success">
+                <div className="media">
+                  <div className="media-left">
+                      <img className="media-object" src={this.props.place.snippet_image_url} alt={this.props.place.name+" image"} />
+                  </div>
+                  <div className="media-body">
+                    <h4 className="media-heading">{this.props.place.name}</h4>
+                    {this.props.place.snippet_text}
+                    {this.props.place.location.display_address.join(" - ")}
+                  </div>
+                </div>
+                
+            </li>
+        );
+    }
+}
 
 class Main extends React.Component {
     constructor(props){
         super(props);
+        
+        this.state = {
+            places:[],
+        };
+        
+        
         this.getBars = this.getBars.bind(this);
+        this.registerPlace = this.registerPlace.bind(this);
     }
     
     getBars(e){
+        
+        
         e.preventDefault();
         
         
-        var location = this.refs.location.value||"";
-        var URL = '/api/bars/'+ location;
+        var location = this.refs.place.value;
+        var component = this;
+        if(!location){
+            alert("getting location");
+            getLocationByIP(function(ipdata){
+                location=ipdata.city;
 
-        
-        $.getJSON(URL)
-        .done(function(data) {
-            console.log( "data" , data);
-          })
-          .fail(function() {
-            console.log( "error" );
-          })
+                getBarsByLocation(location, function(err, data){
+                    if (err) {
+                        console.error(err);
+                        throw err;
+                    }
+                    console.log( "data" , data);
+                    component.setState({places: data.businesses});
+                });
+
+            });
+        } else {
+            getBarsByLocation(location, function(err, data){
+                if (err) {
+                    console.error(err);
+                    throw err;
+                }
+                console.log( "data" , data);
+                component.setState({places: data.businesses});
+            });
+        }
+    }
+    
+    
+    registerPlace(place){
+        console.log(place);
     }
     
     render(){
         
         return (
             <div>
-                <nav className="menu navbar navbar-default">
+                <nav className="menu navbar navbar-default navbar-inverse">
                     <div className="navbar-header">
                         <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#topmenu" aria-expanded="false">
                             <span className="sr-only">Toggle navigation</span>
@@ -55,17 +108,17 @@ class Main extends React.Component {
                     </div>
                 </nav>
 
-                <div className="container-fluid">    
+                <div className="container">    
                     <h1 className="text-center">Plans tonight?</h1>
                     <h3 className="text-center">See which bars are hoppin' tonight and RSVP ahead of time!</h3>
                     <h6 className="text-center">Remember: take a cab and drink responsibly.</h6>
                     
                     
                     <div className="row">
-                        <div className="col-md-8">
-                        <form onSubmit={this.getBars}>
+                        <div className="col-md-12">
+                        <form onSubmit={this.getBars} className="form-horizontal">
                             <div className="input-group">
-                              <input type="text" ref="location" className="form-control" placeholder="... Where do you wanna go tonight?" aria-label="location"/>
+                              <input type="text" ref="place" className="form-control" placeholder="... Where do you wanna go tonight?" aria-label="location"/>
                               <span className="input-group-btn">
                                 <button className="btn btn-danger" type="submit"><span className="glyphicon glyphicon-search"></span> Search a place!</button>
                               </span>
@@ -73,11 +126,43 @@ class Main extends React.Component {
                         </form>
                         </div>
                     </div>
+                
+                    <div className="places row">
+                        <ul className="list-group col-md-12">
+                        {this.state.places.map(function(place, i){
+                            return <Place place={place} key={i} onClick={this.registerPlace.bind(null,place)}/>
+                        })}
+                        </ul>
+                    </div>
                 </div>
-
             </div>  
         );
     }
 }
+
+////////// HELPERS
+function getLocationByIP(callback){
+    var IPAPI = "http://ip-api.com/json/?callback=?";
+    $.getJSON(IPAPI)
+        .done(function(ipdata){
+            if(ipdata.status=="success"){
+                callback(ipdata);
+            }
+        });
+
+}
+
+function getBarsByLocation(location, callback){
+    var URL = '/api/bars/'+ location;
+    $.getJSON(URL)
+        .done(function(data) {
+            callback(null, data);
+        })
+        .fail(function( jqXHR, textStatus, err ) {
+            callback(err)
+        })
+    
+}
+/////////
 
 ReactDOM.render(<Main/>, document.getElementById("app"));
