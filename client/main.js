@@ -22,11 +22,13 @@ class Place extends React.Component {
                   </div>
                   <div className="media-body">
                     <h4 className="media-heading">{this.props.place.name}</h4>
-                    {this.props.place.snippet_text}
-                    {this.props.place.location.display_address.join(" - ")}
+                    <p className="snippet">{this.props.place.snippet_text}</p>
+                    <p className="address">{this.props.place.location.display_address.join(" - ")}</p>
+                  </div>
+                  <div className="pull-right">
+                    <button className="btn btn-sm btn-success" onClick={this.props.register}><span className="badge">4 Going</span> Count me in!</button>
                   </div>
                 </div>
-                
             </li>
         );
     }
@@ -38,6 +40,8 @@ class Main extends React.Component {
         
         this.state = {
             places:[],
+            search:'',
+            userId:123
         };
         
         
@@ -57,7 +61,8 @@ class Main extends React.Component {
             alert("getting location");
             getLocationByIP(function(ipdata){
                 location=ipdata.city;
-
+                
+                this.setState({search: location});
                 getBarsByLocation(location, function(err, data){
                     if (err) {
                         console.error(err);
@@ -69,6 +74,7 @@ class Main extends React.Component {
 
             });
         } else {
+            this.setState({search: location});
             getBarsByLocation(location, function(err, data){
                 if (err) {
                     console.error(err);
@@ -82,7 +88,16 @@ class Main extends React.Component {
     
     
     registerPlace(place){
-        console.log(place);
+        console.log(place, this.state);
+        var URL='/api/places';
+        $.post(URL,{
+            placeId:place.id,
+            search: this.state.search,
+            userId: this.state.userId
+        })
+            .done(function(data){
+                console.log("registered",data);
+            });
     }
     
     render(){
@@ -130,8 +145,8 @@ class Main extends React.Component {
                     <div className="places row">
                         <ul className="list-group col-md-12">
                         {this.state.places.map(function(place, i){
-                            return <Place place={place} key={i} onClick={this.registerPlace.bind(null,place)}/>
-                        })}
+                            return <Place place={place} key={place.id} register={this.registerPlace.bind(null,place)}/>
+                        }.bind(this))}
                         </ul>
                     </div>
                 </div>

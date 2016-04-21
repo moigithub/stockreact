@@ -36,6 +36,9 @@ function getBars(req,res){
 
 }
 
+
+
+
 function handleError(res, err) {
   return res.status(500).send(err);
 }
@@ -48,6 +51,7 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/:location', getBars);
+
 
 
 module.exports = router;

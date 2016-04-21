@@ -95,7 +95,7 @@ app.use(morgan('dev'));
 ///////////// routes
 
 app.use('/api/bars', require('./api/yelp'));
-
+app.use('/api/places', require('./api/places'));
 
 var server = http.createServer(app);
 
