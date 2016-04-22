@@ -142,10 +142,11 @@ class Main extends React.Component {
         })
             .done((data)=>{
        //         console.log("registered",data);
-                var newData= this.state.places.slice().map(yelp=>{
+                var newData= this.state.places.slice();
+                newData.map(yelp=>{
                     //default values
-                    yelp.usersGoing = 0;
-                    yelp.imOnList =false;
+                    //yelp.usersGoing = 0;
+                    //yelp.imOnList =false;
                     if(yelp.id==data.placeId){
                         var usersGoingCount = data.users.length;
                         var imOnList = data.users.indexOf(this.state.userId)>-1;
