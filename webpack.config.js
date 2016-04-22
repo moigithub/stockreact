@@ -10,7 +10,7 @@ var entries = isDev ? [
     // useful if you run your app from another point like django
      
     'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
-    
+    "webpack/hot/dev-server",
     ] : [];
 
 

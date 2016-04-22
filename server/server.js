@@ -36,7 +36,8 @@ if(isDeveloping){
       publicPath: webpackConfig.output.publicPath,
       stats: {
         colors: true,
-      }
+      },
+      hot: true,
   }));
   app.use(webpackHotMiddleware(compiler, {
     log: console.log
@@ -96,6 +97,11 @@ app.use(morgan('dev'));
 
 app.use('/api/bars', require('./api/yelp'));
 app.use('/api/places', require('./api/places'));
+
+
+
+
+
 
 var server = http.createServer(app);
 

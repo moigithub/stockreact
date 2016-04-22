@@ -3,9 +3,9 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var PlaceSchema = new Schema({
-    Location:String, // user input.. chicago, san francisco, texas
-    PlaceId: String,  // which bar from barlist
-    Users: Array,     // who goin
+    location:String, // user input.. chicago, san francisco, texas
+    placeId: String,  // which bar from barlist
+    users: Array,     // who goin
 });
 
 var Place = mongoose.model('Place', PlaceSchema);
@@ -18,30 +18,65 @@ function saveUserGoingToPlace(req, res){
   
   var placeId=req.body.placeId;
   var userId = req.body.userId;
-  var location = req.body.search;
+  var location = req.body.search.toLowerCase();
   console.log("save user going", placeId, userId, location);
   
   
-  Place.find({PlaceId: placeId}, function(err, places){
+  Place.findOne({placeId: placeId, location:location}, function(err, places){
       if(err){ return handleError(res,err);}
-      if(!places){ return res.status(404).send("Not Found");}
-      
-      var data = {Location: location, PlaceId: placeId};
-      // no user exist... add
-      var foundIndex = places.Users.indexOf(userId);
-      if(foundIndex===-1){
-          places.Users.push(userId)
+      console.log("places findone",places);
+      if(!places ){ 
+      // none added yet, im the first going
+        var data = {location: location, placeId: placeId, users:[userId]};
+console.log("place data creating",data);
+        Place.create(data,function(err){
+            if(err){return handleError(res,err);}
+            return res.status(200).json(data);
+        });
+          
       } else {
-          //user exist.. remove
-          places.Users.splice(foundIndex,1);
+        
+console.log("already exist.. looking users", places);
+        
+        
+        // is already added.. me or some1 else coming too
+        // var data = {Location: location, PlaceId: placeId};
+        //check users array
+
+        
+            // no user exist... add
+        var foundIndex = places.users.indexOf(userId);
+        if(foundIndex===-1){
+            places.users.push(userId)
+        } else {
+            //user exist.. remove
+            places.users.splice(foundIndex,1);
+        }
+        
+        places.save(function(err){
+            if(err){return handleError(res,err);}
+            return res.status(200).json(places);
+        });
       }
   });
   
-  
-  
-  res.json(req.body);
+
 }
 
+
+function getPlacesByLocation(req, res){
+  var placeLocation = req.params.placeLocation;
+console.log("places by loca", placeLocation);
+  
+    Place.find({location:placeLocation}, function(err, places){
+      if(err){ return handleError(res,err);}
+console.log("getPlacesbyLoca", places);
+      
+      if(!places||places.length==0){ console.log("no found");return res.status(404).send("No places found"); }
+      console.log("sending places",places);
+      return res.status(200).json(places);
+    });
+}
 
 
 function handleError(res, err) {
@@ -55,6 +90,7 @@ var express = require('express');
 var router = express.Router();
 
 router.post('/', saveUserGoingToPlace);
+router.get('/:placeLocation', getPlacesByLocation);
 
 
 module.exports = router;

@@ -5,8 +5,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-
 require("./styles.css");
+
 
 class Place extends React.Component {
     constructor(props){
@@ -14,6 +14,17 @@ class Place extends React.Component {
     }
     
     render(){
+        var buttonText;
+        var buttonClass;
+
+        if(this.props.place.imOnList){
+            buttonText = "Remove me";
+            buttonClass ="btn-danger";
+        } else {
+            buttonText = "Count me in!";
+            buttonClass ="btn-success";
+        }
+        
         return (
             <li className="list-group-item list-group-item-success">
                 <div className="media">
@@ -26,7 +37,7 @@ class Place extends React.Component {
                     <p className="address">{this.props.place.location.display_address.join(" - ")}</p>
                   </div>
                   <div className="pull-right">
-                    <button className="btn btn-sm btn-success" onClick={this.props.register}><span className="badge">4 Going</span> Count me in!</button>
+                    <button className={"btn btn-sm "+buttonClass} onClick={this.props.register}><span className="badge">{this.props.place.usersGoing} Going</span> {buttonText}</button>
                   </div>
                 </div>
             </li>
@@ -37,24 +48,73 @@ class Place extends React.Component {
 class Main extends React.Component {
     constructor(props){
         super(props);
-        
+
         this.state = {
             places:[],
             search:'',
-            userId:123
+            userId:'1234'
         };
-        
-        
+
         this.getBars = this.getBars.bind(this);
         this.registerPlace = this.registerPlace.bind(this);
+        
+
     }
     
+    
+    ////
+    ////
+    
     getBars(e){
-        
-        
+        //helper
+
+        function processBars(err, data){
+            if (err) {
+                console.error(err);
+                throw err;
+            }
+            console.log( "stat search" , this.state.search);
+            
+            var yelpData = data.businesses;
+            
+            // get list of users registered by place
+            // and combine both data 
+            // add some count field
+            // add nother field to check if the user is going to that bar, to paint with another color
+            var API = "/api/places/"+this.state.search;
+            $.getJSON(API)
+            .done((places)=>{
+                
+                // [ Location:"texax", PlaceId:"la-casa-1", Users:[1,2,3] ]
+                
+                yelpData=yelpData.map((yelp)=>{
+                    var usersGoing = places.filter((place)=> yelp.id==place.placeId)[0];
+                    //console.log("usersGoin",usersGoing);
+                    
+                    //default values
+                    yelp.usersGoing = 0;
+                    yelp.imOnList =false;
+                    if(usersGoing){
+                        var usersGoingCount = usersGoing.users.length;
+                        var imOnList = usersGoing.users.indexOf(this.state.userId)>-1;
+                        
+                        yelp.usersGoing = usersGoingCount;
+                       // yelp.users = usersGoing;
+                        yelp.imOnList = imOnList;
+                    }
+                    return yelp;
+                });
+
+            }).always(()=>{
+                //console.log(" yelp Data",yelpData);
+                this.setState({places: yelpData});
+                
+            });//end getJSON "/api/places/:search"
+        }//end processBars
+        //////////
+
         e.preventDefault();
-        
-        
+
         var location = this.refs.place.value;
         var component = this;
         if(!location){
@@ -62,31 +122,16 @@ class Main extends React.Component {
             getLocationByIP(function(ipdata){
                 location=ipdata.city;
                 
-                this.setState({search: location});
-                getBarsByLocation(location, function(err, data){
-                    if (err) {
-                        console.error(err);
-                        throw err;
-                    }
-                    console.log( "data" , data);
-                    component.setState({places: data.businesses});
-                });
+                component.setState({search: location});
+                getBarsByLocation(location, processBars.bind(component));
 
             });
         } else {
-            this.setState({search: location});
-            getBarsByLocation(location, function(err, data){
-                if (err) {
-                    console.error(err);
-                    throw err;
-                }
-                console.log( "data" , data);
-                component.setState({places: data.businesses});
-            });
+            component.setState({search: location});
+            getBarsByLocation(location, processBars.bind(component));
         }
-    }
-    
-    
+    }//end getBars
+
     registerPlace(place){
         console.log(place, this.state);
         var URL='/api/places';
@@ -95,8 +140,24 @@ class Main extends React.Component {
             search: this.state.search,
             userId: this.state.userId
         })
-            .done(function(data){
+            .done((data)=>{
                 console.log("registered",data);
+                var newData= this.state.places.map(yelp=>{
+                    //default values
+                    yelp.usersGoing = 0;
+                    yelp.imOnList =false;
+                    if(yelp.id==data.placeId){
+                        var usersGoingCount = data.users.length;
+                        var imOnList = data.users.indexOf(this.state.userId)>-1;
+                        
+                        yelp.usersGoing = usersGoingCount;
+                        yelp.imOnList = imOnList;
+                    }
+                    
+                    return yelp;
+                });
+                
+                this.setState({places: newData});
             });
     }
     
@@ -117,7 +178,7 @@ class Main extends React.Component {
                     
                     <div className="collapse navbar-collapse" id="topmenu">
                         <ul className="nav navbar-nav navbar-right">
-                            <li className="navbar-text">Login with</li>
+                            <li className="navbar-text">{this.state.userId} Login with</li>
                             <li><a href="#">Twitter</a></li>
                         </ul>
                     </div>
@@ -141,13 +202,17 @@ class Main extends React.Component {
                         </form>
                         </div>
                     </div>
-                
+                    
+
+
                     <div className="places row">
                         <ul className="list-group col-md-12">
                         {this.state.places.map(function(place, i){
                             return <Place place={place} key={place.id} register={this.registerPlace.bind(null,place)}/>
                         }.bind(this))}
                         </ul>
+                        
+
                     </div>
                 </div>
             </div>  
