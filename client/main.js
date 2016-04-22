@@ -133,7 +133,7 @@ class Main extends React.Component {
     }//end getBars
 
     registerPlace(place){
-        console.log(place, this.state);
+        //console.log(place, this.state);
         var URL='/api/places';
         $.post(URL,{
             placeId:place.id,
@@ -141,8 +141,8 @@ class Main extends React.Component {
             userId: this.state.userId
         })
             .done((data)=>{
-                console.log("registered",data);
-                var newData= this.state.places.map(yelp=>{
+       //         console.log("registered",data);
+                var newData= this.state.places.slice().map(yelp=>{
                     //default values
                     yelp.usersGoing = 0;
                     yelp.imOnList =false;
