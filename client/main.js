@@ -52,15 +52,21 @@ class Main extends React.Component {
         this.state = {
             places:[],
             search:'',
-            userId:'1234'
+            userId:'125'
         };
 
         this.getBars = this.getBars.bind(this);
         this.registerPlace = this.registerPlace.bind(this);
         
-
+        this.randomID = this.randomID.bind(this);
     }
     
+    //////////////////////////////***************
+    randomID(){
+        alert("rnd id");
+        this.setState({userId: Math.floor(Math.random()*10).toString()});
+        console.log("new userId",this.state.userId);
+    }
     
     ////
     ////
@@ -73,7 +79,7 @@ class Main extends React.Component {
                 console.error(err);
                 throw err;
             }
-            console.log( "stat search" , this.state.search);
+            console.log( "stat search" , this.state.search, data.businesses);
             
             var yelpData = data.businesses;
             
@@ -84,11 +90,15 @@ class Main extends React.Component {
             var API = "/api/places/"+this.state.search;
             $.getJSON(API)
             .done((places)=>{
-                
+                console.log("places",places);
+                console.info("toobj", toObject("placeId", places))
                 // [ Location:"texax", PlaceId:"la-casa-1", Users:[1,2,3] ]
                 
+                var objPlaces = toObject("placeId", places);
                 yelpData=yelpData.map((yelp)=>{
-                    var usersGoing = places.filter((place)=> yelp.id==place.placeId)[0];
+                    //var usersGoing = places.filter((place)=> yelp.id==place.placeId)[0];
+                    var usersGoing = objPlaces[yelp.id]; // should be faster than filter everytime
+                    
                     //console.log("usersGoin",usersGoing);
                     
                     //default values
@@ -163,7 +173,7 @@ class Main extends React.Component {
     }
     
     render(){
-        
+        console.log("main this.props ",this);
         return (
             <div>
                 <nav className="menu navbar navbar-default navbar-inverse">
@@ -179,8 +189,12 @@ class Main extends React.Component {
                     
                     <div className="collapse navbar-collapse" id="topmenu">
                         <ul className="nav navbar-nav navbar-right">
-                            <li className="navbar-text">{this.state.userId} Login with</li>
-                            <li><a href="#">Twitter</a></li>
+                            <li className="navbar-text"> 
+<button className="btn btn-success" onClick={this.randomID}>random id</button> 
+{this.state.userId}
+                                Login with
+                            </li>
+                            <li><a href="/auth/twitter">Twitter</a></li>
                         </ul>
                     </div>
                 </nav>
@@ -222,6 +236,14 @@ class Main extends React.Component {
 }
 
 ////////// HELPERS
+function toObject(key, arrayData){
+    var obj={};
+    arrayData.forEach((data)=>{
+        obj[data[key]]=data;
+    });
+    return obj;
+}
+
 function getLocationByIP(callback){
     var IPAPI = "http://ip-api.com/json/?callback=?";
     $.getJSON(IPAPI)
