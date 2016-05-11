@@ -8,12 +8,12 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 
 var mongoose = require('mongoose');
-var session = require('express-session');
-var mongoStore = require('connect-mongo')(session);
-var passport = require('passport');
-var TwitterStrategy = require("passport-twitter").Strategy;
+//var session = require('express-session');
+//var mongoStore = require('connect-mongo')(session);
+//var passport = require('passport');
+//var TwitterStrategy = require("passport-twitter").Strategy;
 var flash = require('connect-flash');
-var ejs = require('ejs');
+//var ejs = require('ejs');
 
 var app = express();
 
@@ -81,14 +81,14 @@ app.use(express.static(path.resolve(path.join(__dirname,".."), 'public'))); // t
 app.use(favicon(__dirname+'/../public/favicon.ico'));
 
 
-
+/*
 app.use(session({
   secret: config.secret,
   resave: true,
   saveUninitialized: true,
   store: new mongoStore({mongooseConnection: mongoose.connection, db: 'nightreact'})
 }));
-
+*/
 
 
 //form process
@@ -100,6 +100,7 @@ app.use(methodOverride());
 app.use(morgan('dev'));
 
 
+/*
 
 /// passport
 passport.use(new TwitterStrategy({
@@ -152,14 +153,16 @@ app.get('/auth/logout', function(req, res) {
     
 app.get('/auth/user', isLoggedIn, function(req,res){
   res.json(req.user);
-})
+});
+
+*/
 ////////////////************* end passport
 
 
 ///////////// routes
 
-app.use('/api/bars', require('./api/yelp'));
-app.use('/api/places', require('./api/places'));
+app.use('/api/stocks', require('./api/stocks'));
+//app.use('/api/places', require('./api/places'));
 
 /*
 // all undefined asset or api routes should return 404 (from yeoman code)
