@@ -10,7 +10,26 @@ var ReactHighstock = require('react-highcharts/dist/ReactHighstock.src');
 
 require("./styles.css");
 
+////////////// REDUX **********
+/////REDUCER ///////
+const handleStocks =(state=[],action)=>{
+    switch(action.type){
+        case 'ADD_STOCK_SYMBOL':
+            return [...state, action.symbol];
+        case 'REMOVE_STOCK_SYMBOL':
+            return state.filter(symbol => symbol!=action.symbol);
+        default:
+            return state;
+    }
+}
+////FIN REDUCER ///
 
+///// STORE ///
+
+/// FIN STORE ////
+
+
+/////////////////
 class Place extends React.Component {
     constructor(props){
         super(props);
