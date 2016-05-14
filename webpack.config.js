@@ -9,27 +9,29 @@ var entries = isDev ? [
     // You can use full urls like 'webpack-hot-middleware/client?path=http://localhost:3000/__webpack_hmr'
     // useful if you run your app from another point like django
      
-    'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
-    "webpack/hot/dev-server",
+    'webpack-hot-middleware/client?reload=true&path=/__webpack_hmr&timeout=20000',
+//    "webpack/hot/dev-server",
+     'webpack/hot/only-dev-server', // "only" prevents reload on syntax errors
+     "./client/index.html",      
     ] : [];
 
-
+    
 console.log("__dirname+client",path.join(__dirname, 'client'));
 
 
 module.exports = {
     // Gives you sourcemaps without slowing down rebundling
-  devtool: isDev ?'eval':'eval-source-map',
+  devtool: isDev ? 'eval-source-map':null,
   devServer: {
 //        contentBase: './client/public',
         progress: true,
         colors: true 
     },
   
-  context: __dirname + "/client",
+//  context: __dirname + "/client",
+  context: __dirname + "/",
   entry: entries.concat ([
-     "./index.html",      
-     "./main.js",
+     "./client/main.js",
   ]),
 
   output: {
@@ -43,10 +45,12 @@ module.exports = {
         {
           test: /\.jsx?$/,
           exclude: /node_modules/,
-          include: path.join(__dirname, 'client'), 
-          loader: ["babel-loader"], 
+//          include: path.join(__dirname, 'client'), 
+          //loader: ["babel-loader"],
+          loader: "babel", 
+          //loaders: ['react-hot', 'babel'],
           query: {
-              presets: ['es2015', 'react' ].concat(isDev?['react-hmre']:[])
+              presets: ['es2015', 'react', 'stage-0' ]  .concat(isDev?['react-hmre']:[])
             },
         },
         {
@@ -80,7 +84,7 @@ module.exports = {
     // new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin(),        
-    
+  
 /*
     new webpack.optimize.UglifyJsPlugin({
       compressor: {

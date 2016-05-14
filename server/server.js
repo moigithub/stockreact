@@ -1,4 +1,9 @@
 'use strict';
+
+require('babel-register')({
+    presets: ['es2015']  //, 'react'
+})
+
 var http = require('http');
 var path = require('path');
 var express = require('express');
@@ -34,7 +39,11 @@ if(isDeveloping){
   
   
   app.use(webpackMiddleware(compiler, {
-      noInfo: true, 
+    lazy: false,
+    noInfo: true,
+    quiet: false,
+    errorDetails: true,
+//      noInfo: true, 
       publicPath: webpackConfig.output.publicPath,
       stats: {
         colors: true,
@@ -190,15 +199,3 @@ server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
 
 
 
-
-function isLoggedIn(req, res, next){
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  
-  return res.status(401).send({ error: "Unauthorized, login first." });
-/*
-  res.status(401);
-    return next(new Error("Unauthorized, login first."));
-*/
-};

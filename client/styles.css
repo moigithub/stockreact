@@ -4,7 +4,7 @@ html {
 }
 
 body {
-    color:#eee;
+    color:#222;
     margin-bottom: 60px;
 
     background: rgba(40,112,130,1);
@@ -26,10 +26,3 @@ footer {
     color:#eee;
 }
 
-form{
-    margin:20px;
-}
-
-.list-group-item{
-    margin-bottom: 5px;
-}

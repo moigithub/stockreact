@@ -1,33 +1,59 @@
-// Request API access: http://www.yelp.com/developers/getting_started/api_access 
-//https://www.npmjs.com/package/yelp
-
 'use strict';
-var request=require("request");
 
-function getStock(req,res){
-//dont forget add/set environment variables with api data
-//https://www.quandl.com/api/v3/datasets/WIKI/twtr/data.json?start_date=2015-05-11&end_date=2016-05-11
-  var API ="https://www.quandl.com/api/v3/datasets/WIKI";
-  var API_DATA="/data.json";
-  var API_START_DATE="?start_date=";
-  var API_END_DATE="&end_date=";
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+var StockSchema = new Schema({
+    symbol:String, // user input.. chicago, san francisco, texas
+    name: String,  // which bar from barlist
+    data: Schema.Types.Mixed,
+    lastUpdated: Date
+});
+
+var Stocks = mongoose.model('Stock', StockSchema);
+
+var quandl = require('../quandl');
+
+
+
+// check if place exist, update: check if user exist add/remove user
+// else create a new one
+function addStock(req, res){
   
-  var today = new Date()
-  var API_URL = API + req.params.symbol + API_DATA + API_START_DATE + formatDate(today,1) + API_END_DATE + formatDate(today,0);
+  var symbol=req.body.symbol.toUpperCase();
 
-  request(API_URL, function(error, response, body) {
-    if (error){
-      return handleError(res, error);
-    }
+    quandl(symbol, new Date(), function(err, quandlData){
+      if(err){ return handleError(res,err);}
+
+      Stocks.findOne({symbol: symbol}, function(err, stock){
+          if(err){ return handleError(res,err);}
+          
+          
+          
+          if(!stock ){ 
+          // none added yet, im the first going
+            var data = {
+              symbol: symbol, 
+              name: quandlData[symbol].meta.name, 
+              data: quandlData[symbol].data,
+              lastUpdated : new Date()
+            };
+            console.log(symbol,"***",data);
+            
+            Stocks.create(data,function(err){
+                if(err){return handleError(res,err);}
+                return res.status(200).json(data);
+            });
     
-    console.log(body);
-    res.json(body);
-  });
+          } else {
+            //already exist
+            return res.status(200).json(stock);
+          }
+      }); //findone
 
-}
+    });//quandl
 
-
-
+}//addstock
 
 function handleError(res, err) {
   return res.status(500).send(err);
@@ -35,20 +61,11 @@ function handleError(res, err) {
 
 
 
-///////////////////////////
 
 var express = require('express');
 var router = express.Router();
 
-router.get('/:symbol', getStock);
-
+router.post('/', addStock);
 
 
 module.exports = router;
-
-
-////helper
-
-function formatDate (date, year=0){
-  return date.getYear()-year + "-" + date.getMonth() + "-" + date.getDay();
-}
