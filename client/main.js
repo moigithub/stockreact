@@ -13,8 +13,8 @@ const ReactHighcharts = require('react-highcharts'); // Expects that Highcharts 
 //const ReactHighstock = require('react-highcharts/ReactHighstock');
 var ReactHighstock = require('react-highcharts/dist/ReactHighstock.src');
 
-require('es6-promise').polyfill();
-import fetch from 'isomorphic-fetch'
+//require('es6-promise').polyfill();
+//import fetch from 'isomorphic-fetch'
 
 
 require("./styles.css");
@@ -30,7 +30,7 @@ const handleStocks =(state={},action)=>{
             });
         case 'REMOVE_STOCK_SYMBOL':
             return Object.assign({},state, {
-                symbols: state.symbols.filter(symbol => symbol!=action.symbol)
+                symbols: state.symbols.filter(symbol => symbol.name!=action.symbol)
             });
         default:
             return state;
@@ -65,6 +65,7 @@ function addSymbol(symbol) {
     return function(dispatch, getState){
         /// http request
         var API_URL ="/api/stocks";
+/*        
         return fetch(API_URL, {
               method: "POST",
               body:  JSON.stringify({"symbol":symbol}),  //just pass the instance
@@ -73,16 +74,28 @@ function addSymbol(symbol) {
                 'Content-Type': 'application/json'
               },
             })
-          .then(response => response.json())
+          .then(response => {
+              console.log("response",response);
+              return response.json()
+          })
           .then(data =>{
-            console.log("response fetch",data);
+            console.log("response fetch", data);
             // We can dispatch many times!
             // Here, we update the app state with the results of the API call.
-            dispatch({type: 'ADD_STOCK_SYMBOL', symbol: data})
+            //dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
               
           }
           );
-
+*/
+        $.post(API_URL,{"symbol":symbol},null, "json")
+            .done(function(data){
+                console.log("data",data);
+                //dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
+            })
+            .fail(function(err){
+                console.log("error",err);
+                alert(err.responseText);
+            });
     }
 
 }
@@ -119,18 +132,7 @@ class AddSymbolForm extends React.Component {
         e.preventDefault();
         var symbol = this.refs.symbol.value.toUpperCase();
         stockStore.dispatch(addSymbol(symbol));
-/*        
-        var newData = {symbol:this.refs.symbol.value};
-        
-        $.post( "/api/stocks", newData ,null, "json")
-          .done(function( data ) {
-                console.log(data);
-        
-          })
-         .fail(function() {
-                console.error( "error getting api/votes data" );
-          });
-*/          
+         
     }
         
     render(){
@@ -168,6 +170,11 @@ AddSymbolForm.contextTypes = {
 class Symbol extends React.Component {
     constructor(props){
         super(props);
+        this.remSymbol=this.remSymbol.bind(this);
+    }
+    
+    remSymbol(symbol){
+        stockStore.dispatch(removeSymbol(symbol));
     }
     
     render(){
@@ -175,14 +182,14 @@ class Symbol extends React.Component {
             <div className="col-xs-12 col-sm-6 col-md-4">
                 <div className="panel panel-primary">
                   <div className="panel-heading">
-                    <h3 className="panel-title">{this.props.name}
-                        <button className="close">
+                    <h3 className="panel-title">{this.props.symbol.name}
+                        <button onClick={this.remSymbol(this.props.symbol)} className="close">
                             <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </button> 
                     </h3>
                   </div>
                   <div class="panel-body">
-                    {this.props.desc}
+                    {this.props.symbol.desc}
                   </div>
                 </div>
             </div>
@@ -201,7 +208,7 @@ class SymbolList extends Component {
         return(
             <div>
             {this.props.symbols.map( (symbol,i)=>
-                <Symbol key={i} desc={symbol.desc} name={symbol.name} />
+                <Symbol key={i} symbol={symbol} />
                 )
             }
             </div>

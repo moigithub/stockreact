@@ -21,20 +21,31 @@ function getStock(symbol, date, callback){
 
   var API_META="https://www.quandl.com/api/v3/datasets/WIKI/"+symbol+"/metadata.json"; //"/metadata.json";
   console.log(API_URL,"\n", API_META);
-
+  
+console.log("getting API meta");
   request(API_META, function(error, response, meta) {
-    if (error){
+    if (error )
       return callback(error);
+console.log("meta",meta);
+
+    meta=JSON.parse(meta);
+
+    if(meta.hasOwnProperty("quandl_error")){
+      
+      console.log("error no data.. probably symbol dont exist");
+      return callback(meta.quandl_error.message);
+    //return;
+      
     }
 
-      request(API_URL, function(err, resp, data) {
+console.log("getting API data");
+    request(API_URL, function(err, resp, data) {
         if (err){
           return callback(err);
         }
         
-        var body = {};
-        meta=JSON.parse(meta);
         data=JSON.parse(data);
+        var body = {};
 
         body[meta["dataset"]["dataset_code"]]={
           "meta": meta.dataset,

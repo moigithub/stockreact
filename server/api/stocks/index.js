@@ -21,12 +21,12 @@ var quandl = require('../quandl');
 function addStock(req, res){
   
   var symbol=req.body.symbol;
-  if(!symbol) {return handleError(res, new Error("Missing symbol name."))}
+  if(!symbol) {return handleError(res, "Missing symbol name.")}
 console.log(symbol);
 
 
-    quandl(symbol, new Date(), function(err, quandlData){
-      if(err){ return handleError(res,err);}
+    quandl(symbol, new Date(), function(qerr, quandlData){
+      if(qerr){ return handleError(res,qerr);}
 
       Stocks.findOne({symbol: symbol}, function(err, stock){
           if(err){ return handleError(res,err);}
@@ -41,16 +41,20 @@ console.log(symbol);
               data: quandlData[symbol].data,
               lastUpdated : new Date()
             };
-            console.log(symbol,"***",data);
+            console.log(symbol,"***");
             
-            Stocks.create(data,function(err){
-                if(err){return handleError(res,err);}
+            Stocks.create(data,function(serr){
+                if(serr){return handleError(res,serr);}
+                console.log("created data");
                 return res.status(200).json(data);
+                
             });
     
           } else {
             //already exist
             return res.status(200).json(stock);
+            
+            
           }
       }); //findone
 
@@ -59,6 +63,7 @@ console.log(symbol);
 }//addstock
 
 function handleError(res, err) {
+  console.log("error",err);
   return res.status(500).send(err);
 }
 
