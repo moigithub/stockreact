@@ -20,7 +20,10 @@ var quandl = require('../quandl');
 // else create a new one
 function addStock(req, res){
   
-  var symbol=req.body.symbol.toUpperCase();
+  var symbol=req.body.symbol;
+  if(!symbol) {return handleError(res, new Error("Missing symbol name."))}
+console.log(symbol);
+
 
     quandl(symbol, new Date(), function(err, quandlData){
       if(err){ return handleError(res,err);}
@@ -33,8 +36,8 @@ function addStock(req, res){
           if(!stock ){ 
           // none added yet, im the first going
             var data = {
-              symbol: symbol, 
-              name: quandlData[symbol].meta.name, 
+              name: symbol, 
+              desc: quandlData[symbol].meta.name, 
               data: quandlData[symbol].data,
               lastUpdated : new Date()
             };

@@ -2,6 +2,7 @@
 /*global $*/
 'use strict';
 
+
 import React, {PropTypes, Component} from 'react';
 import ReactDOM from 'react-dom';
 import {createStore, combineReducers, applyMiddleware} from 'redux';
@@ -12,6 +13,9 @@ const ReactHighcharts = require('react-highcharts'); // Expects that Highcharts 
 //const ReactHighstock = require('react-highcharts/ReactHighstock');
 var ReactHighstock = require('react-highcharts/dist/ReactHighstock.src');
 
+require('es6-promise').polyfill();
+import fetch from 'isomorphic-fetch'
+
 
 require("./styles.css");
 
@@ -20,6 +24,7 @@ require("./styles.css");
 const handleStocks =(state={},action)=>{
     switch(action.type){
         case 'ADD_STOCK_SYMBOL':
+            console.log("handlestock ADD", action);
             return  Object.assign({}, state, {
                 symbols: [...state.symbols, action.symbol]
             });
@@ -35,17 +40,51 @@ const handleStocks =(state={},action)=>{
 
 ///// STORE ///
 import thunk from 'redux-thunk';
-
 const initialState = {symbols:[{name:"AAPL", desc:"aple?"}, {name:"TWRT",desc:"titwr?"}]};
-const createStoreWithThunk = applyMiddleware(thunk)(createStore);
-const stockStore = createStoreWithThunk(handleStocks, initialState);
+//const createStoreWithThunk = applyMiddleware(thunk)(createStore);
+//const stockStore = createStoreWithThunk(handleStocks, initialState);
+
+const stockStore = createStore(
+  handleStocks,
+  initialState,
+  applyMiddleware(
+    thunk // lets us dispatch() functions
+  )
+)
+
 /// FIN STORE ////
 ////////ACTION CREATOR//////
 function addSymbol(symbol) {
+/*
   return {
     type: 'ADD_STOCK_SYMBOL',
     symbol
   }
+*/
+
+    return function(dispatch, getState){
+        /// http request
+        var API_URL ="/api/stocks";
+        return fetch(API_URL, {
+              method: "POST",
+              body:  JSON.stringify({"symbol":symbol}),  //just pass the instance
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+            })
+          .then(response => response.json())
+          .then(data =>{
+            console.log("response fetch",data);
+            // We can dispatch many times!
+            // Here, we update the app state with the results of the API call.
+            dispatch({type: 'ADD_STOCK_SYMBOL', symbol: data})
+              
+          }
+          );
+
+    }
+
 }
 function removeSymbol(symbol) {
   return {
@@ -78,7 +117,7 @@ class AddSymbolForm extends React.Component {
 
     handleSubmit(e){
         e.preventDefault();
-        var symbol = {name:this.refs.symbol.value.toUpperCase(), desc:"xxx"};
+        var symbol = this.refs.symbol.value.toUpperCase();
         stockStore.dispatch(addSymbol(symbol));
 /*        
         var newData = {symbol:this.refs.symbol.value};
