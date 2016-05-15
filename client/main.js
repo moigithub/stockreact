@@ -2,35 +2,61 @@
 /*global $*/
 'use strict';
 
-import React from 'react';
+import React, {PropTypes, Component} from 'react';
 import ReactDOM from 'react-dom';
+import {createStore, combineReducers, applyMiddleware} from 'redux';
+// const Provider = require('react-redux').Provider
+import { Provider, connect } from 'react-redux'
+
 const ReactHighcharts = require('react-highcharts'); // Expects that Highcharts was loaded in the code.
 //const ReactHighstock = require('react-highcharts/ReactHighstock');
 var ReactHighstock = require('react-highcharts/dist/ReactHighstock.src');
+
 
 require("./styles.css");
 
 ////////////// REDUX **********
 /////REDUCER ///////
-const handleStocks =(state=[],action)=>{
+const handleStocks =(state={},action)=>{
     switch(action.type){
         case 'ADD_STOCK_SYMBOL':
-            return [...state, action.symbol];
+            return  Object.assign({}, state, {
+                symbols: [...state.symbols, action.symbol]
+            });
         case 'REMOVE_STOCK_SYMBOL':
-            return state.filter(symbol => symbol!=action.symbol);
+            return Object.assign({},state, {
+                symbols: state.symbols.filter(symbol => symbol!=action.symbol)
+            });
         default:
             return state;
     }
-}
+};
 ////FIN REDUCER ///
 
 ///// STORE ///
+import thunk from 'redux-thunk';
 
+const initialState = {symbols:[{name:"AAPL", desc:"aple?"}, {name:"TWRT",desc:"titwr?"}]};
+const createStoreWithThunk = applyMiddleware(thunk)(createStore);
+const stockStore = createStoreWithThunk(handleStocks, initialState);
 /// FIN STORE ////
-
+////////ACTION CREATOR//////
+function addSymbol(symbol) {
+  return {
+    type: 'ADD_STOCK_SYMBOL',
+    symbol
+  }
+}
+function removeSymbol(symbol) {
+  return {
+    type: 'REMOVE_STOCK_SYMBOL',
+    symbol
+  }
+}
+///////END ACTION CREATOR//////////
 
 /////////////////
-class Place extends React.Component {
+class Place extends Component {
     constructor(props){
         super(props);
     }
@@ -52,6 +78,9 @@ class AddSymbolForm extends React.Component {
 
     handleSubmit(e){
         e.preventDefault();
+        var symbol = {name:this.refs.symbol.value.toUpperCase(), desc:"xxx"};
+        stockStore.dispatch(addSymbol(symbol));
+/*        
         var newData = {symbol:this.refs.symbol.value};
         
         $.post( "/api/stocks", newData ,null, "json")
@@ -62,6 +91,7 @@ class AddSymbolForm extends React.Component {
          .fail(function() {
                 console.error( "error getting api/votes data" );
           });
+*/          
     }
         
     render(){
@@ -90,7 +120,11 @@ class AddSymbolForm extends React.Component {
             );
     }
 }
-
+/*
+AddSymbolForm.contextTypes = {
+  store: PropTypes.object
+}
+*/
 
 class Symbol extends React.Component {
     constructor(props){
@@ -118,17 +152,38 @@ class Symbol extends React.Component {
     }
 }
 
+class SymbolList extends Component {
+    constructor(props){
+        super(props);
+    }
+    
+    render(){
+        console.log("props.symbols",this.props.symbols);
+        return(
+            <div>
+            {this.props.symbols.map( (symbol,i)=>
+                <Symbol key={i} desc={symbol.desc} name={symbol.name} />
+                )
+            }
+            </div>
+        );
+
+    }
+}
+
+
 class Main extends React.Component {
     constructor(props){
         super(props);
 
-        
-        
-        this.state = {
-            stockList:[],
-        };
     }
     
+    componentDidMount(){
+        this.unsubscribe = stockStore.subscribe(()=>this.forceUpdate());
+    }
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
 
     render(){
         var seriesOptions=[];
@@ -178,8 +233,10 @@ class Main extends React.Component {
         };
         
         ////////.
-
+        //const state = this.context.store.getState();
+        console.log("stockStore.getState()", stockStore.getState());
         return (
+            
             <div>
                 <div id="chart">
                     <ReactHighstock config = {config}></ReactHighstock>
@@ -188,20 +245,33 @@ class Main extends React.Component {
 
                 <div id="stockList">
                     <div className="row">
-                        <AddSymbolForm/>
-                        <Symbol desc="hola" name="MSGT" />
-                        <Symbol desc="asdfsdf" name="AAPL" />
-                        <Symbol desc="hoadsfasdfla" name="NASQ" />
-                        <Symbol desc="hoadsfsdfla" name="FB" />
-                        <Symbol desc="4534534" name="TWRE" />
+                        <AddSymbolForm />
+                        <SymbolList  symbols={stockStore.getState().symbols}/>
 
                     </div>
                 </div>
             </div>
             );
     }
-    
 }    
 
-
+/*
+function mapStateToProps(state) {
+    return {
+        symbols:state.symbols
+    }
+}
+var MainApp = connect(mapStateToProps)(Main);
+*/
+/*
+export default class Root extends Component {
+  render() {
+    return (
+      <Provider store={stockStore}>
+        <Main />
+      </Provider>
+    )
+  }
+}
+*/
 ReactDOM.render(<Main/>, document.getElementById("app"));
