@@ -22,6 +22,8 @@ function addStock(req, res){
   
   var symbol=req.body.symbol;
   if(!symbol) {return handleError(res, "Missing symbol name.")}
+  
+  symbol = symbol.toUpperCase();
 console.log(symbol);
 
 

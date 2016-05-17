@@ -26,7 +26,7 @@ console.log("getting API meta");
   request(API_META, function(error, response, meta) {
     if (error )
       return callback(error);
-console.log("meta",meta);
+//console.log("meta",meta);
 
     meta=JSON.parse(meta);
 
@@ -51,6 +51,8 @@ console.log("getting API data");
           "meta": meta.dataset,
           "data": data.dataset_data
         };
+        
+        //console.log("allOK",body);
         return callback(null, body);
       });//end request data
   });//end request meta

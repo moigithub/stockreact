@@ -41,9 +41,9 @@ const handleStocks =(state={},action)=>{
 ///// STORE ///
 import thunk from 'redux-thunk';
 const initialState = {symbols:[{name:"AAPL", desc:"aple?"}, {name:"TWRT",desc:"titwr?"}]};
-//const createStoreWithThunk = applyMiddleware(thunk)(createStore);
-//const stockStore = createStoreWithThunk(handleStocks, initialState);
-
+const createStoreWithThunk = applyMiddleware(thunk)(createStore);
+const stockStore = createStoreWithThunk(handleStocks, initialState);
+/*
 const stockStore = createStore(
   handleStocks,
   initialState,
@@ -51,7 +51,7 @@ const stockStore = createStore(
     thunk // lets us dispatch() functions
   )
 )
-
+*/
 /// FIN STORE ////
 ////////ACTION CREATOR//////
 function addSymbol(symbol) {
@@ -62,35 +62,14 @@ function addSymbol(symbol) {
   }
 */
 
-    return function(dispatch, getState){
+    return function(dispatch){
         /// http request
         var API_URL ="/api/stocks";
-/*        
-        return fetch(API_URL, {
-              method: "POST",
-              body:  JSON.stringify({"symbol":symbol}),  //just pass the instance
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-            })
-          .then(response => {
-              console.log("response",response);
-              return response.json()
-          })
-          .then(data =>{
-            console.log("response fetch", data);
-            // We can dispatch many times!
-            // Here, we update the app state with the results of the API call.
-            //dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
-              
-          }
-          );
-*/
+
         $.post(API_URL,{"symbol":symbol},null, "json")
             .done(function(data){
                 console.log("data",data);
-                //dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
+                dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
             })
             .fail(function(err){
                 console.log("error",err);
@@ -108,19 +87,8 @@ function removeSymbol(symbol) {
 ///////END ACTION CREATOR//////////
 
 /////////////////
-class Place extends Component {
-    constructor(props){
-        super(props);
-    }
-    
-    render(){
-        return (
-            <div></div>
-            );
-    }
-}
 
-
+//const AddSymbolForm = connect()(SymbolForm);
 class AddSymbolForm extends React.Component {
     constructor(props){
         super(props);
@@ -131,8 +99,8 @@ class AddSymbolForm extends React.Component {
     handleSubmit(e){
         e.preventDefault();
         var symbol = this.refs.symbol.value.toUpperCase();
-        stockStore.dispatch(addSymbol(symbol));
-         
+        this.context.store.dispatch(addSymbol(symbol));
+
     }
         
     render(){
@@ -140,10 +108,10 @@ class AddSymbolForm extends React.Component {
             <div className="col-xs-12 col-sm-6 col-md-4">
                 <div className="panel panel-success">
                   <div className="panel-heading">
-                    <h3 class="panel-title">Add new Symbol:</h3>
+                    <h3 className="panel-title">Add new Symbol:</h3>
                         
                   </div>
-                  <div class="panel-body">
+                  <div className="panel-body">
                         <form onSubmit={this.handleSubmit}>
                             <div className="input-group  input-group-lg">
                               <input type="text" ref="symbol" name="symbol" placeholder="Enter symbol name here" className="form-control" />
@@ -161,35 +129,31 @@ class AddSymbolForm extends React.Component {
             );
     }
 }
-/*
 AddSymbolForm.contextTypes = {
   store: PropTypes.object
 }
-*/
+
+
 
 class Symbol extends React.Component {
     constructor(props){
         super(props);
-        this.remSymbol=this.remSymbol.bind(this);
     }
-    
-    remSymbol(symbol){
-        stockStore.dispatch(removeSymbol(symbol));
-    }
-    
+
     render(){
+        const {symbol, onClick} = this.props;
         return (
             <div className="col-xs-12 col-sm-6 col-md-4">
                 <div className="panel panel-primary">
                   <div className="panel-heading">
-                    <h3 className="panel-title">{this.props.symbol.name}
-                        <button onClick={this.remSymbol(this.props.symbol)} className="close">
+                    <h3 className="panel-title">{symbol.name}
+                        <button onClick={onClick} className="close">
                             <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </button> 
                     </h3>
                   </div>
                   <div class="panel-body">
-                    {this.props.symbol.desc}
+                    {symbol.desc}
                   </div>
                 </div>
             </div>
@@ -198,25 +162,28 @@ class Symbol extends React.Component {
     }
 }
 
-class SymbolList extends Component {
-    constructor(props){
-        super(props);
-    }
-    
-    render(){
-        console.log("props.symbols",this.props.symbols);
-        return(
-            <div>
-            {this.props.symbols.map( (symbol,i)=>
-                <Symbol key={i} symbol={symbol} />
-                )
-            }
-            </div>
-        );
-
+const _SymbolList =({symbols,remSymbol})=>(
+        <div>
+        {symbols.map( (symbol,i)=>
+            <Symbol key={i} symbol={symbol} onClick={remSymbol(symbol)} />
+            )
+        }
+        </div>
+)
+function mapDispatchToProps(dispatch){
+    return {
+        remSymbol: (symbol)=>{
+            dispatch(removeSymbol(symbol));
+        }
+    };
+}
+function mapStateToProps(state) {
+    console.log("mapstatetoprops store",state);
+    return {
+        symbols:state.symbols
     }
 }
-
+var SymbolList = connect(mapStateToProps,mapDispatchToProps)(_SymbolList);
 
 class Main extends React.Component {
     constructor(props){
@@ -224,13 +191,6 @@ class Main extends React.Component {
 
     }
     
-    componentDidMount(){
-        this.unsubscribe = stockStore.subscribe(()=>this.forceUpdate());
-    }
-    componentWillUnmount(){
-        this.unsubscribe();
-    }
-
     render(){
         var seriesOptions=[];
         seriesOptions=[{
@@ -280,7 +240,7 @@ class Main extends React.Component {
         
         ////////.
         //const state = this.context.store.getState();
-        console.log("stockStore.getState()", stockStore.getState());
+        
         return (
             
             <div>
@@ -292,7 +252,7 @@ class Main extends React.Component {
                 <div id="stockList">
                     <div className="row">
                         <AddSymbolForm />
-                        <SymbolList  symbols={stockStore.getState().symbols}/>
+                        <SymbolList />
 
                     </div>
                 </div>
@@ -301,15 +261,9 @@ class Main extends React.Component {
     }
 }    
 
-/*
-function mapStateToProps(state) {
-    return {
-        symbols:state.symbols
-    }
-}
-var MainApp = connect(mapStateToProps)(Main);
-*/
-/*
+
+
+
 export default class Root extends Component {
   render() {
     return (
@@ -319,5 +273,5 @@ export default class Root extends Component {
     )
   }
 }
-*/
-ReactDOM.render(<Main/>, document.getElementById("app"));
+
+ReactDOM.render(<Root/>, document.getElementById("app"));
