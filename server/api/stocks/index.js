@@ -88,6 +88,14 @@ function delStock(req, res){
 
 }//delete stokc
 
+function getStock(req, res){
+  Stocks.find({},function(err,stocks){
+    if(err){ return handleError(res,err);}
+    
+    return res.status(200).json(stocks);
+    
+  });
+}
 
 function handleError(res, err) {
   console.log("error",err);
@@ -97,9 +105,11 @@ function handleError(res, err) {
 
 
 
+
 var express = require('express');
 var router = express.Router();
 
+router.get('/', getStock);
 router.post('/', addStock);
 router.delete('/:symbol', delStock);
 

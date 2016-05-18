@@ -23,6 +23,8 @@ require("./styles.css");
 /////REDUCER ///////
 const handleStocks =(state={},action)=>{
     switch(action.type){
+        case 'SERVER_DATA':
+            return action.symbol;
         case 'ADD_STOCK_SYMBOL':
             return  Object.assign({}, state, {
                 symbols: [...state.symbols, action.symbol]
@@ -54,6 +56,25 @@ const stockStore = createStore(
 */
 /// FIN STORE ////
 ////////ACTION CREATOR//////
+function getServerData() {
+
+    return function(dispatch){
+        /// http request
+        var API_URL ="/api/stocks";
+
+        $.get(API_URL)
+            .done(function(data){
+                console.log("data",data);
+                dispatch({type: 'SERVER_DATA', symbol:data})
+            })
+            .fail(function(err){
+                console.log("error",err);
+                alert(err.responseText);
+            });
+    }
+
+}
+
 function addSymbol(symbol) {
 /*
   return {
@@ -78,6 +99,7 @@ function addSymbol(symbol) {
     }
 
 }
+
 function removeSymbol(symbol) {
 /*    
   return {
@@ -220,6 +242,13 @@ class Main extends React.Component {
     constructor(props){
         super(props);
 
+    }
+    
+    componentDidMount(){
+        //get initial data from server
+        //dispatch ??
+        this.context.store.dispatch(getServerData());
+        
     }
     
     render(){
