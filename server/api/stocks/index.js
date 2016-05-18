@@ -67,6 +67,28 @@ console.log(symbol);
 
 }//addstock
 
+
+function delStock(req, res){
+  var symbol=req.params.symbol;
+  if(!symbol) {return handleError(res, "Missing symbol name.")}
+  
+  symbol = symbol.toUpperCase();
+  console.log("delete",symbol);
+
+
+  Stocks.findOne({name: symbol}, function(err, stock){
+    if(err){ return handleError(res,err);}
+    if(!stock) { return res.status(404).send('Not Found'); }
+    
+    Stocks.remove(function(err) {
+      if(err) { return handleError(res, err); }
+      return res.status(204).send('No Content');
+    });
+  });
+
+}//delete stokc
+
+
 function handleError(res, err) {
   console.log("error",err);
   return res.status(500).send(err);
@@ -79,6 +101,6 @@ var express = require('express');
 var router = express.Router();
 
 router.post('/', addStock);
-
+router.delete('/:symbol', delStock);
 
 module.exports = router;

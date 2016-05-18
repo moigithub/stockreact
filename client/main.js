@@ -24,13 +24,13 @@ require("./styles.css");
 const handleStocks =(state={},action)=>{
     switch(action.type){
         case 'ADD_STOCK_SYMBOL':
-            console.log("handlestock ADD", action);
             return  Object.assign({}, state, {
                 symbols: [...state.symbols, action.symbol]
             });
         case 'REMOVE_STOCK_SYMBOL':
+            console.log("reducer del",action);
             return Object.assign({},state, {
-                symbols: state.symbols.filter(symbol => symbol.name!=action.symbol)
+                symbols: state.symbols.filter(symbol => symbol.name!=action.symbol.name)
             });
         default:
             return state;
@@ -79,10 +79,31 @@ function addSymbol(symbol) {
 
 }
 function removeSymbol(symbol) {
+/*    
   return {
     type: 'REMOVE_STOCK_SYMBOL',
     symbol
   }
+*/
+
+    return function(dispatch){
+        /// http request
+        var API_URL ="/api/stocks/";
+console.log("delete",symbol);
+        $.ajax({
+            url:API_URL+symbol.name,
+            type:"DELETE"
+        })
+            .done(function(data){
+                console.log("data",data);
+                dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:symbol})
+            })
+            .fail(function(err){
+                console.log("error",err);
+                alert(err.responseText);
+            });
+    }
+  
 }
 ///////END ACTION CREATOR//////////
 
