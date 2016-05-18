@@ -4,8 +4,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var StockSchema = new Schema({
-    symbol:String, // user input.. chicago, san francisco, texas
-    name: String,  // which bar from barlist
+    name:String, // user input.. chicago, san francisco, texas
+    desc: String,  // which bar from barlist
     data: Schema.Types.Mixed,
     lastUpdated: Date
 });
@@ -30,7 +30,7 @@ console.log(symbol);
     quandl(symbol, new Date(), function(qerr, quandlData){
       if(qerr){ return handleError(res,qerr);}
 
-      Stocks.findOne({symbol: symbol}, function(err, stock){
+      Stocks.findOne({name: symbol}, function(err, stock){
           if(err){ return handleError(res,err);}
           
           

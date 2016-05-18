@@ -97,9 +97,10 @@ class AddSymbolForm extends React.Component {
     }
 
     handleSubmit(e){
+        const {store} = this.context;
         e.preventDefault();
         var symbol = this.refs.symbol.value.toUpperCase();
-        this.context.store.dispatch(addSymbol(symbol));
+        store.dispatch(addSymbol(symbol));
 
     }
         
@@ -130,7 +131,7 @@ class AddSymbolForm extends React.Component {
     }
 }
 AddSymbolForm.contextTypes = {
-  store: PropTypes.object
+  store: React.PropTypes.object
 }
 
 
@@ -162,14 +163,23 @@ class Symbol extends React.Component {
     }
 }
 
-const _SymbolList =({symbols,remSymbol})=>(
-        <div>
-        {symbols.map( (symbol,i)=>
-            <Symbol key={i} symbol={symbol} onClick={remSymbol(symbol)} />
-            )
-        }
-        </div>
-)
+class _SymbolList extends React.Component {
+    constructor(props){
+        super(props);
+    }
+
+    render(){
+        const {symbols, remSymbol} = this.props;
+        console.log("symbols",symbols);
+        return(
+            <div>
+                {symbols.map((symbol,i)=>(
+                    <Symbol key={i} symbol={symbol} onClick={()=>remSymbol(symbol)}/>
+                ))}
+            </div>
+        );
+    }
+}
 function mapDispatchToProps(dispatch){
     return {
         remSymbol: (symbol)=>{
@@ -259,9 +269,7 @@ class Main extends React.Component {
             </div>
             );
     }
-}    
-
-
+}
 
 
 export default class Root extends Component {
