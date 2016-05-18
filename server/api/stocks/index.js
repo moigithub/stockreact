@@ -27,40 +27,43 @@ function addStock(req, res){
 console.log(symbol);
 
 
-    quandl(symbol, new Date(), function(qerr, quandlData){
-      if(qerr){ return handleError(res,qerr);}
+  Stocks.findOne({name: symbol}, function(err, stock){
+      if(err){ return handleError(res,err);}
+      
+      if(!stock ){ 
+        // none added yet, im the first going
 
-      Stocks.findOne({name: symbol}, function(err, stock){
-          if(err){ return handleError(res,err);}
+        quandl(symbol, new Date(), function(qerr, quandlData){
+          if(qerr){ return handleError(res,qerr);}
           
+          var data = {
+            name: symbol, 
+            desc: quandlData[symbol].meta.name, 
+            data: quandlData[symbol].data,
+            lastUpdated : new Date()
+          };
+          console.log(symbol,"***");
           
-          
-          if(!stock ){ 
-          // none added yet, im the first going
-            var data = {
-              name: symbol, 
-              desc: quandlData[symbol].meta.name, 
-              data: quandlData[symbol].data,
-              lastUpdated : new Date()
-            };
-            console.log(symbol,"***");
-            
-            Stocks.create(data,function(serr){
-                if(serr){return handleError(res,serr);}
-                console.log("created data");
-                return res.status(200).json(data);
-                
-            });
-    
-          } else {
-            //already exist
-            return res.status(200).json(stock);
-            
-            
-          }
-      }); //findone
+          Stocks.create(data,function(serr){
+              if(serr){return handleError(res,serr);}
+              console.log("created data");
+              return res.status(200).json(data);
+              
+          });
+        });//quandl
 
-    });//quandl
+      } else {
+        //already exist
+        //return error
+        //return res.status(200).json(stock);
+        
+        //409 Conflict
+        return  res.status(409).send("Error: Symbol already exist");
+        
+        
+      }
+  }); //findone
+
 
 }//addstock
 

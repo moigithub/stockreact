@@ -64,7 +64,7 @@ var config={
     options:{
       db:{safe:true}
     },
-    uri : process.env.MONGO_URI || 'mongodb://localhost/nightreact'
+    uri : process.env.MONGO_URI || 'mongodb://localhost/stockreact'
   },
   secret:'supers3cretpassw0rd.dont.tell,any1'
 };
