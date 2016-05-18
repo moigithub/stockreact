@@ -21,19 +21,15 @@ require("./styles.css");
 
 ////////////// REDUX **********
 /////REDUCER ///////
-const handleStocks =(state={},action)=>{
+const handleStocks =(state=[],action)=>{
     switch(action.type){
         case 'SERVER_DATA':
             return action.symbol;
         case 'ADD_STOCK_SYMBOL':
-            return  Object.assign({}, state, {
-                symbols: [...state.symbols, action.symbol]
-            });
+            return [...state, action.symbol];
         case 'REMOVE_STOCK_SYMBOL':
             console.log("reducer del",action);
-            return Object.assign({},state, {
-                symbols: state.symbols.filter(symbol => symbol.name!=action.symbol.name)
-            });
+            return state.filter(symbol => symbol.name!=action.symbol.name);
         default:
             return state;
     }
@@ -42,7 +38,7 @@ const handleStocks =(state={},action)=>{
 
 ///// STORE ///
 import thunk from 'redux-thunk';
-const initialState = {symbols:[{name:"AAPL", desc:"aple?"}, {name:"TWRT",desc:"titwr?"}]};
+const initialState = [{name:"AAPL", desc:"aple?"}, {name:"TWRT",desc:"titwr?"}];
 const createStoreWithThunk = applyMiddleware(thunk)(createStore);
 const stockStore = createStoreWithThunk(handleStocks, initialState);
 /*
@@ -213,7 +209,7 @@ class _SymbolList extends React.Component {
 
     render(){
         const {symbols, remSymbol} = this.props;
-        console.log("symbols",symbols);
+        console.log("symbols",this.props);
         return(
             <div>
                 {symbols.map((symbol,i)=>(
@@ -233,7 +229,7 @@ function mapDispatchToProps(dispatch){
 function mapStateToProps(state) {
     console.log("mapstatetoprops store",state);
     return {
-        symbols:state.symbols
+        symbols:state
     }
 }
 var SymbolList = connect(mapStateToProps,mapDispatchToProps)(_SymbolList);
@@ -320,7 +316,9 @@ class Main extends React.Component {
             );
     }
 }
-
+Main.contextTypes={
+    store: React.PropTypes.object
+};
 
 export default class Root extends Component {
   render() {

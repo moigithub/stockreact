@@ -91,7 +91,7 @@ function delStock(req, res){
 function getStock(req, res){
   Stocks.find({},function(err,stocks){
     if(err){ return handleError(res,err);}
-    
+    console.log("all stocks",stocks);
     return res.status(200).json(stocks);
     
   });
