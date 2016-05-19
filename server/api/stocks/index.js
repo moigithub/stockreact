@@ -12,6 +12,28 @@ var StockSchema = new Schema({
 
 var Stocks = mongoose.model('Stock', StockSchema);
 
+function registerSocket(socket){
+  Stocks.schema.post('save', function (doc) {
+    onSave(socket, doc);
+  });
+  Stocks.schema.post('remove', function (doc) {
+    onRemove(socket, doc);
+  });
+}
+
+function onSave(socket, doc, cb) {
+  socket.emit('save', doc);
+}
+
+function onRemove(socket, doc, cb) {
+  socket.emit('remove', doc);
+}
+
+
+
+
+/////////////////////
+
 var quandl = require('../quandl');
 
 

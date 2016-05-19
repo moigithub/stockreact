@@ -191,6 +191,7 @@ app.route('*').get(function(req,res){
 
 
 var server = http.createServer(app);
+var io = require('socket.io')(server);
 
 server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
   var addr = server.address();
@@ -199,3 +200,9 @@ server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
 
 
 
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+});

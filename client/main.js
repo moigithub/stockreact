@@ -1,5 +1,6 @@
 // react main
 /*global $*/
+/*global io*/
 'use strict';
 
 
@@ -18,6 +19,17 @@ var ReactHighstock = require('react-highcharts/dist/ReactHighstock.src');
 
 
 require("./styles.css");
+/////////// SOCKET
+var socket = io();
+socket.on( 'remove', function (item) {
+  stockStore.dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:item})
+  //cb(event, item, array);
+});
+
+socket.on( 'save', function (item) {
+  stockStore.dispatch({type: 'ADD_STOCK_SYMBOL', symbol:item})
+  //cb(event, item, array);
+});
 
 ////////////// REDUX **********
 /////REDUCER ///////
