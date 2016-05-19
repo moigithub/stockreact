@@ -22,11 +22,13 @@ require("./styles.css");
 /////////// SOCKET
 var socket = io();
 socket.on( 'remove', function (item) {
+    console.log("socket remove",item);
   stockStore.dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:item})
   //cb(event, item, array);
 });
 
 socket.on( 'save', function (item) {
+    console.log("socket save",item);
   stockStore.dispatch({type: 'ADD_STOCK_SYMBOL', symbol:item})
   //cb(event, item, array);
 });
@@ -40,7 +42,7 @@ const handleStocks =(state=[],action)=>{
         case 'ADD_STOCK_SYMBOL':
             return [...state, action.symbol];
         case 'REMOVE_STOCK_SYMBOL':
-            console.log("reducer del",action);
+            //console.log("reducer del",action);
             return state.filter(symbol => symbol.name!=action.symbol.name);
         default:
             return state;
@@ -72,7 +74,7 @@ function getServerData() {
 
         $.get(API_URL)
             .done(function(data){
-                console.log("data",data);
+                //console.log("data",data);
                 dispatch({type: 'SERVER_DATA', symbol:data})
             })
             .fail(function(err){
@@ -97,8 +99,9 @@ function addSymbol(symbol) {
 
         $.post(API_URL,{"symbol":symbol},null, "json")
             .done(function(data){
-                console.log("data",data);
-                dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
+                //console.log("data",data);
+                // socket will add data to state
+                //dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
             })
             .fail(function(err){
                 console.log("error",err);
@@ -119,14 +122,15 @@ function removeSymbol(symbol) {
     return function(dispatch){
         /// http request
         var API_URL ="/api/stocks/";
-console.log("delete",symbol);
+//console.log("delete",symbol);
         $.ajax({
             url:API_URL+symbol.name,
             type:"DELETE"
         })
             .done(function(data){
-                console.log("data",data);
-                dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:symbol})
+                //console.log("data",data);
+                // socket will remove data to state
+                //dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:symbol})
             })
             .fail(function(err){
                 console.log("error",err);
@@ -221,7 +225,7 @@ class _SymbolList extends React.Component {
 
     render(){
         const {symbols, remSymbol} = this.props;
-        console.log("symbols",this.props);
+        //console.log("symbols",this.props);
         return(
             <div>
                 {symbols.map((symbol,i)=>(
@@ -239,7 +243,7 @@ function mapDispatchToProps(dispatch){
     };
 }
 function mapStateToProps(state) {
-    console.log("mapstatetoprops store",state);
+    //console.log("mapstatetoprops store",state);
     return {
         symbols:state
     }
@@ -284,7 +288,7 @@ class Chart extends Component {
         }
         
         seriesOptions = state.map(function(stock){
-            console.log("map stock",stock);
+            //console.log("map stock",stock);
             return {name: stock.name, data:stock.data.data}
         });
         

@@ -1,36 +1,5 @@
 'use strict';
-
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-
-var StockSchema = new Schema({
-    name:String, // user input.. chicago, san francisco, texas
-    desc: String,  // which bar from barlist
-    data: Schema.Types.Mixed,
-    lastUpdated: Date
-});
-
-var Stocks = mongoose.model('Stock', StockSchema);
-
-function registerSocket(socket){
-  Stocks.schema.post('save', function (doc) {
-    onSave(socket, doc);
-  });
-  Stocks.schema.post('remove', function (doc) {
-    onRemove(socket, doc);
-  });
-}
-
-function onSave(socket, doc, cb) {
-  socket.emit('save', doc);
-}
-
-function onRemove(socket, doc, cb) {
-  socket.emit('remove', doc);
-}
-
-
-
+var Stocks = require('./stocks_model');
 
 /////////////////////
 
@@ -46,7 +15,7 @@ function addStock(req, res){
   if(!symbol) {return handleError(res, "Missing symbol name.")}
   
   symbol = symbol.toUpperCase();
-console.log(symbol);
+//console.log(symbol);
 
 
   Stocks.findOne({name: symbol}, function(err, stock){
@@ -64,11 +33,11 @@ console.log(symbol);
             data: quandlData[symbol].data,
             lastUpdated : new Date()
           };
-          console.log(symbol,"***");
+          //console.log(symbol,"***");
           
           Stocks.create(data,function(serr){
               if(serr){return handleError(res,serr);}
-              console.log("created data");
+              //console.log("created data");
               return res.status(200).json(data);
               
           });
@@ -95,7 +64,7 @@ function delStock(req, res){
   if(!symbol) {return handleError(res, "Missing symbol name.")}
   
   symbol = symbol.toUpperCase();
-  console.log("delete",symbol);
+  //console.log("delete",symbol);
 
 
   Stocks.findOne({name: symbol}, function(err, stock){
@@ -113,7 +82,7 @@ function delStock(req, res){
 function getStock(req, res){
   Stocks.find({},function(err,stocks){
     if(err){ return handleError(res,err);}
-    console.log("all stocks",stocks);
+    //console.log("all stocks",stocks);
     return res.status(200).json(stocks);
     
   });

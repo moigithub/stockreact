@@ -20,9 +20,9 @@ function getStock(symbol, date, callback){
   var API_URL = API + symbol + API_DATA + API_START_DATE + formatDate(date,1) + API_END_DATE + formatDate(date,0)+"&api_key="+process.env.API_KEY;
 
   var API_META="https://www.quandl.com/api/v3/datasets/WIKI/"+symbol+"/metadata.json?api_key="+process.env.API_KEY; //"/metadata.json";
-  console.log(API_URL,"\n", API_META);
+  //console.log(API_URL,"\n", API_META);
   
-console.log("getting API meta");
+//console.log("getting API meta");
   request(API_META, function(error, response, meta) {
     if (error )
       return callback(error);
@@ -38,7 +38,7 @@ console.log("getting API meta");
       
     }
 
-console.log("getting API data");
+//console.log("getting API data");
     request(API_URL, function(err, resp, data) {
         if (err){
           return callback(err);

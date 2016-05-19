@@ -199,10 +199,33 @@ server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
 });
 
 
+//////////////////////// socket.io
+var Stocks = require('./api/stocks/stocks_model');
+function registerSocket(socket){
+  Stocks.schema.post('save', function (doc) {
+    onSave(socket, doc);
+  });
+  Stocks.schema.post('remove', function (doc) {
+    onRemove(socket, doc);
+  });
+}
+
+function onSave(socket, doc, cb) {
+  console.log("emiting save");
+  socket.emit('save', doc);
+}
+
+function onRemove(socket, doc, cb) {
+  console.log("emiting remove");
+  socket.emit('remove', doc);
+}
 
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.on('disconnect', function(){
     console.log('user disconnected');
   });
+  
+  registerSocket(socket);
 });
+
