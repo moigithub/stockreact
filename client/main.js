@@ -288,9 +288,16 @@ class Chart extends Component {
         }
         
         seriesOptions = state.map(function(stock){
-            //console.log("map stock",stock);
-            return {name: stock.name, data:stock.data.data}
+            //console.log("map stock",stock.name,stock.data.data);
+            //date, open, high, low, close, volume, ex-dividend, split ratio, ajd.open, adj high, adj.low, adj.close, adj.volume
+            return {
+                name: stock.name, 
+                data : stock.data.data.map(function(stat){
+                    return [Date.parse(stat[0]),parseFloat(stat[4])]
+                })
+            };
         });
+        //console.log("series",seriesOptions);
         
         var config = {
           rangeSelector: {
