@@ -80,7 +80,7 @@ function delStock(req, res){
     if(err){ return handleError(res,err);}
     if(!stock) { return res.status(404).send('Not Found'); }
     
-    Stocks.remove(function(err) {
+    stock.remove(function(err) {
       if(err) { return handleError(res, err); }
       return res.status(204).send('No Content');
     });
