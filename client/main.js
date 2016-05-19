@@ -294,7 +294,7 @@ class Chart extends Component {
                 name: stock.name, 
                 data : stock.data.data.map(function(stat){
                     return [Date.parse(stat[0]),parseFloat(stat[4])]
-                })
+                }).sort(function(a,b){ return a[0]-b[0]})
             };
         });
         //console.log("series",seriesOptions);
