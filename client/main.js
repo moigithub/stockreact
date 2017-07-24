@@ -208,7 +208,7 @@ class Symbol extends React.Component {
                         </button> 
                     </h3>
                   </div>
-                  <div class="panel-body">
+                  <div className="panel-body">
                     {symbol.desc}
                   </div>
                 </div>
