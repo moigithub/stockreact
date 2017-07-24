@@ -7,8 +7,11 @@
   "author": "Mostafa Eweda <mo.eweda@gmail.com>",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "NODE_ENV=development babel-node server/server.js",
-    "prod": "NODE_ENV=production webpack -p node server/server.js"
+    "dev": "cross-env NODE_ENV=development babel-node server/server.js",
+    "prod": "cross-env NODE_ENV=production webpack -p node server/server.js"
+  },
+  "engines": {
+    "node": "6.11.1"
   },
   "dependencies": {
     "body-parser": "^1.15.0",
@@ -28,7 +31,7 @@
     "redux-thunk": "^2.1.0",
     "request": "^2.72.0",
     "serve-favicon": "^2.3.0",
-    "socket.io": "^1.4.6"
+    "socket.io": "^1.7.4"
   },
   "devDependencies": {
     "babel-cli": "^6.8.0",
@@ -42,6 +45,7 @@
     "babel-preset-stage-2": "^6.5.0",
     "babel-preset-stage-3": "^6.5.0",
     "babel-register": "^6.8.0",
+    "cross-env": "^5.0.1",
     "css-loader": "^0.23.1",
     "dotenv": "^2.0.0",
     "extract-text-webpack-plugin": "^1.0.1",
