@@ -62,11 +62,11 @@ if(isDeveloping){
 var config={
   mongo:{
     options:{
-      db:{safe:true}
+      db:{safe:true},
+      useMongoClient: true
     },
     uri : process.env.MONGO_URI || 'mongodb://localhost/stockreact'
   },
-  useMongoClient: true,
   secret:'supers3cretpassw0rd.dont.tell,any1'
 };
 
