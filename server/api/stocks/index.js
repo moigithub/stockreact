@@ -1,5 +1,5 @@
 'use strict';
-var Stocks = require('./stocks_model');
+var Stocks = require('./stocks_model').Stock;
 
 /////////////////////
 

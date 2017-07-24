@@ -22,13 +22,13 @@ require("./styles.css");
 /////////// SOCKET
 var socket = io();
 socket.on( 'remove', function (item) {
-    console.log("socket remove",item);
+  //  console.log("socket remove",item);
   stockStore.dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:item})
   //cb(event, item, array);
 });
 
 socket.on( 'save', function (item) {
-    console.log("socket save",item);
+  //  console.log("socket save",item);
   stockStore.dispatch({type: 'ADD_STOCK_SYMBOL', symbol:item})
   //cb(event, item, array);
 });
@@ -78,7 +78,7 @@ function getServerData() {
                 dispatch({type: 'SERVER_DATA', symbol:data})
             })
             .fail(function(err){
-                console.log("error",err);
+                console.log("getserverdata error",err);
                 alert(err.responseText);
             });
     }
@@ -104,7 +104,7 @@ function addSymbol(symbol) {
                 //dispatch({type: 'ADD_STOCK_SYMBOL', symbol:data})
             })
             .fail(function(err){
-                console.log("error",err);
+                console.log("addsymbol error",err);
                 alert(err.responseText);
             });
     }
@@ -133,7 +133,7 @@ function removeSymbol(symbol) {
                 //dispatch({type: 'REMOVE_STOCK_SYMBOL', symbol:symbol})
             })
             .fail(function(err){
-                console.log("error",err);
+                console.log("removesymbol error",err);
                 alert(err.responseText);
             });
     }

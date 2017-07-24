@@ -62,8 +62,9 @@ if(isDeveloping){
 var config={
   mongo:{
     options:{
-      db:{safe:true},
-      useMongoClient: true
+    //  db:{safe:true},
+      useMongoClient: true,
+//      promiseLibrary: global.Promise
     },
     uri : process.env.MONGO_URI || 'mongodb://localhost/stockreact'
   },
@@ -201,32 +202,38 @@ server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function(){
 
 
 //////////////////////// socket.io
-var Stocks = require('./api/stocks/stocks_model');
+var Stocks = require('./api/stocks/stocks_model').Stock;
+var ThingEvents = require('./api/stocks/stocks_model').events;
+
 function registerSocket(socket){
-  Stocks.schema.post('save', function (doc) {
-    onSave(socket, doc);
-  });
-  Stocks.schema.post('remove', function (doc) {
-    onRemove(socket, doc);
-  });
+  var listener;
+  listener = createListener('save', socket);
+
+  ThingEvents.on('save', listener);
+  socket.on('disconnect', removeListener('save', listener));
+  
+  //---- 
+  listener = createListener('remove', socket);
+
+  ThingEvents.on('remove', listener);
+  socket.on('disconnect', removeListener('remove', listener));
 }
 
-function onSave(socket, doc, cb) {
-  console.log("emiting save");
-  socket.emit('save', doc);
+function createListener(event, socket) {
+  return function(doc) {
+    socket.emit(event, doc);
+  };
 }
 
-function onRemove(socket, doc, cb) {
-  console.log("emiting remove");
-  socket.emit('remove', doc);
+function removeListener(event, listener) {
+  return function() {
+    ThingEvents.removeListener(event, listener);
+  };
 }
+
+
 
 io.on('connection', function(socket){
-  console.log('a user connected');
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
-  
   registerSocket(socket);
 });
 
