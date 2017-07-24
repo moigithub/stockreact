@@ -69,7 +69,7 @@ var config={
   },
   secret:'supers3cretpassw0rd.dont.tell,any1'
 };
-
+mongoose.Promise = global.Promise;
 /// connect to db
 mongoose.connect(config.mongo.uri, config.mongo.options);
 mongoose.connection.on('error', function(err){
