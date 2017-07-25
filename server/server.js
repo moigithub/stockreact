@@ -33,7 +33,7 @@ if(isDeveloping){
   var webpackConfig =require('../webpack.config.js');
   //import webpack from 'webpack';  
   var webpackMiddleware =require('webpack-dev-middleware');
-  var webpackHotMiddleware = require('webpack-hot-middleware');
+  //var webpackHotMiddleware = require('webpack-hot-middleware');
   var compiler = webpack(webpackConfig);
   
   
@@ -48,13 +48,15 @@ if(isDeveloping){
       stats: {
         colors: true,
       },
-      hot: true,
+//      hot: true,
   }));
+/*
   app.use(webpackHotMiddleware(compiler, {
     log: console.log,
     path: '/__webpack_hmr',
     heartbeat: 10 * 1000,
   }));
+*/
 }// end isDeveloping
 
 
