@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-import {EventEmitter} from 'events';
+var EventEmitter =require('events').EventEmitter;
 
 var ThingEvents = new EventEmitter();
 // Set max event listeners (0 == unlimited)
